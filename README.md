@@ -9,7 +9,7 @@ Final Year Project (IIT/UoW)
 - Node.js ≥ 18
 - Express.js
 - TypeScript
-- PostgreSQL (via `pg`)
+- MongoDB (via `mongoose`)
 - CORS
 - dotenv (environment variables)
 - Development: ts-node-dev
@@ -89,7 +89,7 @@ Modular MVC Folder Structure
 ### Prerequisites
 - Node.js (v16.18 or higher)
 - npm or yarn
-- PostgreSQL database
+- MongoDB database
 
 ### Installation
 
@@ -139,7 +139,7 @@ PORT=4000
 NODE_ENV=development
 
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/database"
+DATABASE_URL="mongodb://localhost:27017/**********db"
 
 # API Security (Optional)
 API_KEY="your-api-key"
