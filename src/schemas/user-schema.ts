@@ -52,6 +52,10 @@ export const userSchema = new mongoose.Schema(
       type: Schema.Types.String,
       require: false,
     },
+    address: {
+      type: Schema.Types.String,
+      required: false,
+    },
     is_active: {
       type: Schema.Types.Boolean,
       require: true,

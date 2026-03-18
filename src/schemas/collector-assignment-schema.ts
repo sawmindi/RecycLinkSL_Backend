@@ -15,10 +15,12 @@ export const collectorAssignmentSchema = new mongoose.Schema(
     collector_id: {
       type: Schema.Types.ObjectId,
       required: true,
+      ref: "User",
     },
     category_id: {
       type: Schema.Types.ObjectId,
       required: true,
+      ref: "Category",
     },
     area: {
       type: Schema.Types.String,

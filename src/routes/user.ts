@@ -1,5 +1,6 @@
 import { Express } from "express";
 import { UserEp } from "../end-point/user-ep";
+import { CitizenEp } from "../end-point/citizen-ep";
 import { Authentication } from "../middleware/authentication";
 
 export function initUserRoutes(app: Express) {
@@ -41,5 +42,44 @@ export function initUserRoutes(app: Express) {
         "/api/public/otpVerificationForgotPassword",
         UserEp.otpVerificationForgotPassword
     );
+
+    // Citizen protected APIs
+    const auth = [Authentication.verifyToken];
+
+    // Dashboard
+    app.get("/api/citizen/dashboard/stats", auth, CitizenEp.getDashboardStats);
+
+    // Pickup requests (citizen)
+    app.get("/api/pickup-requests/citizen", auth, CitizenEp.getPickupRequests);
+    app.post(
+        "/api/pickup-requests",
+        auth,
+        CitizenEp.createPickupRequestRules(),
+        CitizenEp.createPickupRequest
+    );
+
+    // Available schedules for citizen
+    app.get(
+        "/api/pickup-schedules/citizen",
+        auth,
+        CitizenEp.getAvailableSchedules
+    );
+
+    // Assign schedule to pickup request
+    app.put(
+        "/api/pickup-requests/:requestId/schedule",
+        auth,
+        CitizenEp.assignScheduleRules(),
+        CitizenEp.assignSchedule
+    );
+
+    // Active items
+    app.get("/api/items/active", auth, CitizenEp.getActiveItems);
+
+    // Collection history
+    app.get("/api/citizen/history", auth, CitizenEp.getHistory);
+
+    // Notifications
+    app.get("/api/citizen/notifications", auth, CitizenEp.getNotifications);
 
 }

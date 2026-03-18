@@ -7,7 +7,7 @@
     "start": "nodemon --exec ts-node src/server.ts -e ts",
     "build": "set NODE_OPTIONS=--max-old-space-size=4096 && tsc && xcopy src\\assets dist\\assets /E /I /Y",
     "start:prod": "node dist/server.js",
-    "seed": "ts-node src/seed/seed-runner",
+    "seed": "ts-node src/seed/seed-runner.js",
     "test": "NODE_ENV=test PORT=3011 mocha -r ts-node/register test/**/*.test.ts --exit",
     "test:watch": "nodemon -e ts --exec mocha -r ts-node/register test/**/*.test.ts",
     "migrate": "ts-node src/migrations/migration-runner"

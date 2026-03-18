@@ -1,5 +1,6 @@
 import { Express, Request, Response } from "express";
 import { initAdminRoutes } from "./admin";
+import { initAdminPanelRoutes } from "./admin-panel";
 import { initUserRoutes } from "./user";
 
 export function initRoutes(app: Express) {
@@ -9,6 +10,7 @@ export function initRoutes(app: Express) {
   );
 
   initAdminRoutes(app);
+  initAdminPanelRoutes(app);
   initUserRoutes(app);
   /* ALL INVALID REQUESTS */
   app.get("/", (req: Request, res: Response) => res.redirect(301, "/api"));

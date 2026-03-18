@@ -15,6 +15,7 @@ export const priceManagementSchema = new mongoose.Schema(
     category_id: {
       type: Schema.Types.ObjectId,
       required: true,
+      ref: "Category",
     },
     name: {
       type: Schema.Types.String,
