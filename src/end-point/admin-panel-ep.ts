@@ -19,7 +19,7 @@ import { Util } from "../common/util";
 import { Types } from "mongoose";
 
 export namespace AdminPanelEp {
-  // ---- Dashboard ----
+ // Dashboard
   export async function getDashboardStats(req: Request, res: Response) {
     try {
       const todayStart = new Date();
@@ -81,7 +81,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Pickup schedules ----
+  // Pickup schedules 
   export async function getPickupSchedules(req: Request, res: Response) {
     try {
       const list = await ScheduleDao.findAll();
@@ -136,7 +136,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Categories ----
+  // Categories 
   export async function getCategoriesAdmin(req: Request, res: Response) {
     try {
       const list = await CategoryDao.findAll();
@@ -209,7 +209,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Collectors ----
+  // Collectors
   export async function getCollectors(req: Request, res: Response) {
     try {
       const list = await User.find({ role: UserRole.COLLECTOR })
@@ -226,7 +226,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Collector–category assignments ----
+  // Collector–category assignments 
   export async function getCollectorCategoryAssignments(req: Request, res: Response) {
     try {
       const list = await CollectorAssignmentDao.findAll();
@@ -261,7 +261,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Pickup requests (admin) ----
+  // Pickup requests (admin)
   export async function getPickupRequestsAdmin(req: Request, res: Response) {
     try {
       const list = await PickupRequestDao.findAllForAdmin();
@@ -297,7 +297,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Items (price management) ----
+  // Items (price management) 
   export async function getItems(req: Request, res: Response) {
     try {
       const list = await PriceManagementDao.findAll();
@@ -351,7 +351,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Users (admin) ----
+  // Users (admin) 
   export async function getUsersAdmin(req: Request, res: Response) {
     try {
       const list = await UserDao.getUsersForAdmin();
