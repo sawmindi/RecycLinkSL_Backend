@@ -16,7 +16,7 @@ export namespace UserDao {
 
     export async function getUserById(id: StringOrObjectId): Promise<IUser> {
         let user: IUser = await User.findById(id)
-            .select({ password: 0 });
+            .select({ password_hash: 0 });
         if (!user) {
             throw new ApplicationError("User not found for Id: " + id);
         }
@@ -107,8 +107,29 @@ export namespace UserDao {
 
 
     export async function updateUser(id: Types.ObjectId, data: Partial<DUser>): Promise<IUser> {
-        let user = await User.findByIdAndUpdate(id, { $set: data }, { new: true }).select({ password: 0 });
+        let user = await User.findByIdAndUpdate(id, { $set: data }, { new: true }).select({ password_hash: 0 });
         return user;
+    }
+
+    /** List all users for admin panel (exclude password). */
+    export async function getUsersForAdmin(): Promise<any[]> {
+        const list = await User.find({}).select("-password_hash").sort({ createdAt: -1 }).lean();
+        return (list as any[]).map((u) => ({
+            id: u._id?.toString(),
+            full_name: u.full_name,
+            email: u.email ?? null,
+            mobile_number: u.mobile_number || "",
+            address: u.address || "",
+            role: u.role || "",
+            is_active: u.is_active !== false,
+            joined_date: u.createdAt ? new Date(u.createdAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+        }));
+    }
+
+    export async function deleteUser(id: Types.ObjectId | string): Promise<void> {
+        if (!Util.isObjectId(String(id))) throw new ApplicationError("Invalid user id");
+        const result = await User.findByIdAndDelete(id);
+        if (!result) throw new ApplicationError("User not found");
     }
 
 }

@@ -14,6 +14,7 @@ interface Common {
   mobile_number?: string;
   email?: string;
   area?: string;
+  address?: string;
   role?: UserRole;
   password_hash?: string;
   is_active?: boolean;

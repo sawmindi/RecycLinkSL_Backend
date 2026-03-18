@@ -14,7 +14,8 @@ export const scheduleSchema = new mongoose.Schema(
   {
     collector_id: {
       type: Schema.Types.ObjectId,
-      required: true,
+      required: false,
+      ref: "User",
     },
     date: {
       type: Schema.Types.Date,
@@ -26,11 +27,21 @@ export const scheduleSchema = new mongoose.Schema(
     },
     capacity_kg: {
       type: Schema.Types.Number,
-      required: true,
+      required: false,
+      default: 0,
     },
     area: {
       type: Schema.Types.String,
       required: true,
+    },
+    items: {
+      type: Schema.Types.String,
+      required: false,
+    },
+    status: {
+      type: Schema.Types.String,
+      required: false,
+      default: "pending",
     },
   },
   schemaOptions
