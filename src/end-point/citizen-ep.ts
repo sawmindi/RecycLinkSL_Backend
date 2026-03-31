@@ -144,7 +144,7 @@ export namespace CitizenEp {
     }
   }
 
-  // Available schedules for citizen 
+  // Available schedules for citizen
   export async function getAvailableSchedules(req: Request, res: Response) {
     try {
       const area = (req.query.area as string) || undefined;
@@ -159,9 +159,10 @@ export namespace CitizenEp {
       const result = (list as any[]).map((s) => ({
         _id: (s._id || s.id)?.toString(),
         area: s.area,
+        items: s.items,
         schedule_date: s.date ? new Date(s.date).toISOString().split("T")[0] : "",
         schedule_time: s.time || "",
-        collector_name: s.collector_id?.full_name,
+        full_name: s.collector_id?.full_name,
         spots_left: undefined as number | undefined,
         status: s.status || "pending",
       }));
@@ -200,7 +201,7 @@ export namespace CitizenEp {
     }
   }
 
-  // Active items 
+  // Active items
   export async function getActiveItems(req: Request, res: Response) {
     try {
       const list = await PriceManagement.find({ status: { $in: [null, "active"] } })

@@ -12,13 +12,4 @@ export class JwtToken {
             });
         });
     }
-
-    // public static createToken(payload: any, expiresIn = '90d') {
-    //     return jwt.sign(payload, process.env.JWT_SECRET, {expiresIn});
-    // }
-
-    // public static createPasswordToken(email: string) {
-    //     const payload = {email: email};
-    //     return jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: '90d'});
-    // }
 }

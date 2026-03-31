@@ -5,11 +5,11 @@ import { CollectorEp } from "../end-point/collector-ep";
 import { Authentication } from "../middleware/authentication";
 
 export function initUserRoutes(app: Express) {
-    // Citizen signup (public)
+    // Citizen signup
     app.post(
         "/api/public/signUp",
         UserEp.signUpValidationRules(),
-        UserEp.signUp
+        UserEp.signUpAsCitizen
     );
 
     app.post(
@@ -59,7 +59,7 @@ export function initUserRoutes(app: Express) {
         CitizenEp.createPickupRequest
     );
 
-    // Available schedules for citizen
+    // Available schedules (citizen)
     app.get(
         "/api/pickup-schedules/citizen",
         auth,
@@ -102,6 +102,14 @@ export function initUserRoutes(app: Express) {
         collectorAuth,
         CollectorEp.completePickupRules(),
         CollectorEp.completePickup
+    );
+
+    // Cancel pickup request
+    app.post(
+        "/api/collector/pickups/:requestId/cancel",
+        collectorAuth,
+        CollectorEp.cancelPickupRules(),
+        CollectorEp.cancelPickup
     );
 
     // Collector collection history

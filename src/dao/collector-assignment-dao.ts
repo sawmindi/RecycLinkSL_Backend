@@ -1,8 +1,5 @@
 import { Types } from "mongoose";
-import { ICollectorAssignment } from "../models/collector-assignment-model";
 import CollectorAssignment from "../schemas/collector-assignment-schema";
-import User from "../schemas/user-schema";
-import Category from "../schemas/category-schema";
 import { ApplicationError } from "../common/application-error";
 import { Util } from "../common/util";
 

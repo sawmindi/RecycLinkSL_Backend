@@ -1,7 +1,6 @@
 import { Types } from "mongoose";
 import { ISchedule } from "../models/schedule-model";
 import Schedule from "../schemas/schedule-schema";
-import User from "../schemas/user-schema";
 import { ApplicationError } from "../common/application-error";
 import { Util } from "../common/util";
 
