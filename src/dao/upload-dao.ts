@@ -2,7 +2,6 @@ import { DUpload, IUpload } from "../models/upload-model";
 import Upload from "../schemas/upload-schema";
 import { AppLogger } from "../common/logging";
 import { StringOrObjectId } from "../common/util";
-import { Types } from "mongoose";
 
 export namespace UploadDao {
   export async function createUpload(data: DUpload): Promise<IUpload> {

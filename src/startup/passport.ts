@@ -9,7 +9,7 @@ const LocalStrategy = require("passport-local").Strategy;
 const JWTStrategy = passportJWT.Strategy;
 
 export default async function passportStartup(app: express.Application) {
-  app.use(passport.initialize()); // Keep only this
+  app.use(passport.initialize());
 
   passport.use(
     new LocalStrategy(

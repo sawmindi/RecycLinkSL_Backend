@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { UserDao } from "../dao/user-dao";
-import { check, validationResult } from "express-validator";
-import { DUser, IUser, UserRole } from "../models/user-model";
-import multer = require("multer");
+import { validationResult } from "express-validator";
+import { UserRole } from "../models/user-model";
 import { Validation } from "../common/validation";
 import { Util } from "../common/util";
 import { Types } from "mongoose";
@@ -69,7 +68,7 @@ export namespace UserEp {
         return res.sendSuccess(user, "Success");
     }
 
-    export async function signUp(req: Request, res: Response, next: NextFunction) {
+    export async function signUpAsCitizen(req: Request, res: Response, next: NextFunction) {
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
@@ -82,7 +81,6 @@ export namespace UserEp {
         const mobile_number = req.body.phoneNumber || req.body.mobile_number;
         const area = req.body.area;
         const password_hash = req.body.password;
-        // New citizens start as inactive until OTP verification
         const is_active = false;
         const role = UserRole.CITIZEN;
         let user = null;
@@ -257,13 +255,6 @@ export namespace UserEp {
                     fullHash: fullHash
                 }
                 return res.sendSuccess(data1, "OTPGENERATED");
-                // otpSent = await SMSService.sendSMS(phoneNumber, text);
-
-                // if (otpSent) {
-                //     return res.sendSuccess(fullHash, "OTPGENERATED");
-                // } else {
-                //     return res.sendError("" + "OTP generate fail");
-                // }
             }
         } catch (error) {
             return res.sendError(error);

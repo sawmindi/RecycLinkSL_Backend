@@ -2,7 +2,6 @@ import * as mongoose from "mongoose";
 import { Schema } from "mongoose";
 import * as bcrypt from "bcryptjs";
 import { IUser } from "../models/user-model";
-import { FirebaseTokenSchema } from "./sub-schema/firebase-token-schema";
 
 const jwt = require("jsonwebtoken");
 
@@ -52,10 +51,6 @@ export const userSchema = new mongoose.Schema(
       type: Schema.Types.String,
       require: false,
     },
-    address: {
-      type: Schema.Types.String,
-      required: false,
-    },
     is_active: {
       type: Schema.Types.Boolean,
       require: true,
@@ -79,7 +74,7 @@ userSchema.pre("save", function (next) {
   });
 });
 
-// @ts-ignore
+
 userSchema.methods.createAccessToken = function (this: IUser) {
   return jwt.sign({ user_id: this._id }, process.env.JWT_SECRET);
 };
@@ -88,8 +83,6 @@ userSchema.methods.comparePassword = function (
   password_hash: any
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    // noinspection JSIgnoredPromiseFromCall
-    // @ts-ignore
     bcrypt.compare(password_hash, this.password_hash, function (err, isMatch) {
       if (err) {
         return reject(err);
@@ -102,8 +95,6 @@ userSchema.methods.comparePassword = function (
 
 userSchema.methods.compareVerificationCode = function (verificationCode: any): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    // noinspection JSIgnoredPromiseFromCall
-    // @ts-ignore
     bcrypt.compare(verificationCode, this.verificationCode, function (err, isMatch) {
       if (err) {
         return reject(err);

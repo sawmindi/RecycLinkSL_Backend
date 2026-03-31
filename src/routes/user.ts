@@ -1,14 +1,15 @@
 import { Express } from "express";
 import { UserEp } from "../end-point/user-ep";
 import { CitizenEp } from "../end-point/citizen-ep";
+import { CollectorEp } from "../end-point/collector-ep";
 import { Authentication } from "../middleware/authentication";
 
 export function initUserRoutes(app: Express) {
-    // Citizen signup (public)
+    // Citizen signup
     app.post(
         "/api/public/signUp",
         UserEp.signUpValidationRules(),
-        UserEp.signUp
+        UserEp.signUpAsCitizen
     );
 
     app.post(
@@ -43,7 +44,7 @@ export function initUserRoutes(app: Express) {
         UserEp.otpVerificationForgotPassword
     );
 
-    // Citizen protected APIs
+    // Shared auth
     const auth = [Authentication.verifyToken];
 
     // Dashboard
@@ -58,7 +59,7 @@ export function initUserRoutes(app: Express) {
         CitizenEp.createPickupRequest
     );
 
-    // Available schedules for citizen
+    // Available schedules (citizen)
     app.get(
         "/api/pickup-schedules/citizen",
         auth,
@@ -81,5 +82,40 @@ export function initUserRoutes(app: Express) {
 
     // Notifications
     app.get("/api/citizen/notifications", auth, CitizenEp.getNotifications);
+
+    // Collector protected APIs
+    const collectorAuth = [Authentication.verifyToken, Authentication.collectorVerification];
+
+    // Collector dashboard
+    app.get("/api/collector/dashboard/stats", collectorAuth, CollectorEp.getDashboardStats);
+
+    // Collector schedules / routes
+    app.get("/api/pickup-schedules/collector/today", collectorAuth, CollectorEp.getTodayRoutes);
+    app.get("/api/pickup-schedules/collector", collectorAuth, CollectorEp.getSchedules);
+
+    // Collector pickups with citizen details
+    app.get("/api/collector/pickups", collectorAuth, CollectorEp.getPickupRoutes);
+
+    // Complete pickup
+    app.post(
+        "/api/collector/pickups/:requestId/complete",
+        collectorAuth,
+        CollectorEp.completePickupRules(),
+        CollectorEp.completePickup
+    );
+
+    // Cancel pickup request
+    app.post(
+        "/api/collector/pickups/:requestId/cancel",
+        collectorAuth,
+        CollectorEp.cancelPickupRules(),
+        CollectorEp.cancelPickup
+    );
+
+    // Collector collection history
+    app.get("/api/collector/history", collectorAuth, CollectorEp.getHistory);
+
+    // Collector notifications
+    app.get("/api/collector/notifications", collectorAuth, CollectorEp.getNotifications);
 
 }

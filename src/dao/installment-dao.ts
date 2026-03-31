@@ -32,13 +32,11 @@ export namespace InstallmentDao {
             let installmentAmount = 0;
 
             if (interestType === "flat") {
-                // Flat interest -> simple total interest divided equally
                 const totalInterest = (amountOfLend * interestRate * duration) / 100;
                 profitFromInstallment = totalInterest / totalInstallments;
                 installmentAmount =
                     amountOfLend / totalInstallments + profitFromInstallment;
             } else {
-                // Reducing interest -> interest calculated on remaining principal
                 profitFromInstallment = (principalBalance * interestRate) / 100;
                 installmentAmount =
                     amountOfLend / totalInstallments + profitFromInstallment;
@@ -60,7 +58,6 @@ export namespace InstallmentDao {
             installments.push(installment);
         }
 
-        // Save all installments
         const saved = await Installment.insertMany(installments);
         return saved;
     }

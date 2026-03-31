@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { Authentication } from "../middleware/authentication";
 
 function paramId(req: Request, key: string): string {
   const p = req.params[key];
@@ -15,11 +14,10 @@ import { UserDao } from "../dao/user-dao";
 import User from "../schemas/user-schema";
 import Schedule from "../schemas/schedule-schema";
 import { UserRole } from "../models/user-model";
-import { Util } from "../common/util";
 import { Types } from "mongoose";
 
 export namespace AdminPanelEp {
-  // ---- Dashboard ----
+  // Dashboard
   export async function getDashboardStats(req: Request, res: Response) {
     try {
       const todayStart = new Date();
@@ -81,7 +79,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Pickup schedules ----
+  // Pickup schedules 
   export async function getPickupSchedules(req: Request, res: Response) {
     try {
       const list = await ScheduleDao.findAll();
@@ -136,7 +134,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Categories ----
+  // Categories 
   export async function getCategoriesAdmin(req: Request, res: Response) {
     try {
       const list = await CategoryDao.findAll();
@@ -209,7 +207,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Collectors ----
+  // Collectors
   export async function getCollectors(req: Request, res: Response) {
     try {
       const list = await User.find({ role: UserRole.COLLECTOR })
@@ -226,7 +224,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Collector–category assignments ----
+  // Collector–category assignments 
   export async function getCollectorCategoryAssignments(req: Request, res: Response) {
     try {
       const list = await CollectorAssignmentDao.findAll();
@@ -261,7 +259,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Pickup requests (admin) ----
+  // Pickup requests (admin)
   export async function getPickupRequestsAdmin(req: Request, res: Response) {
     try {
       const list = await PickupRequestDao.findAllForAdmin();
@@ -297,7 +295,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Items (price management) ----
+  // Items (price management)
   export async function getItems(req: Request, res: Response) {
     try {
       const list = await PriceManagementDao.findAll();
@@ -351,7 +349,7 @@ export namespace AdminPanelEp {
     }
   }
 
-  // ---- Users (admin) ----
+  // Users (admin)
   export async function getUsersAdmin(req: Request, res: Response) {
     try {
       const list = await UserDao.getUsersForAdmin();
@@ -374,7 +372,7 @@ export namespace AdminPanelEp {
         role,
       } = req.body;
       const username = mobile_number || email || `user_${Date.now()}`;
-      const password_hash = await Util.passwordHashing(password);
+      const password_hash = password;
       const is_active = true;
       const userRole = role === "COLLECTOR" ? UserRole.COLLECTOR : role === "ADMIN" ? UserRole.ADMIN : UserRole.CITIZEN;
       const existing = await UserDao.getUserByPhoneNumber(mobile_number);
@@ -414,7 +412,7 @@ export namespace AdminPanelEp {
         full_name: updated.full_name,
         email: updated.email ?? null,
         mobile_number: updated.mobile_number || "",
-        address: (updated as any).address || "",
+        area: (updated as any).area || "",
         role: updated.role,
         is_active: updated.is_active !== false,
         joined_date: (updated as any).createdAt ? new Date((updated as any).createdAt).toISOString().split("T")[0] : "",
