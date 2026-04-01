@@ -34,6 +34,7 @@ export namespace UserDao {
         mobile_number: string,
         email: string,
         area: string,
+        address: string,
         role: UserRole,
         password_hash: string,
         is_active?: boolean,
@@ -48,6 +49,7 @@ export namespace UserDao {
                 email: email,
                 mobile_number: mobile_number,
                 area: area,
+                address: address,
                 password_hash: password_hash,
                 role: role,
                 is_active: is_active
@@ -80,6 +82,7 @@ export namespace UserDao {
         mobile_number: string,
         email: string,
         area: string,
+        address: string,
         role: UserRole,
         password_hash: string,
         is_active: boolean = true,
@@ -90,6 +93,7 @@ export namespace UserDao {
             email,
             mobile_number,
             area,
+            address,
             password_hash,
             role,
             is_active,
@@ -111,6 +115,7 @@ export namespace UserDao {
         return user;
     }
 
+    /** List all users for admin panel (exclude password). */
     export async function getUsersForAdmin(): Promise<any[]> {
         const list = await User.find({}).select("-password_hash").sort({ createdAt: -1 }).lean();
         return (list as any[]).map((u) => ({

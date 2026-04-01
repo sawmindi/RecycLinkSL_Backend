@@ -368,6 +368,7 @@ export namespace AdminPanelEp {
         mobile_number,
         email,
         area,
+        address,
         password,
         role,
       } = req.body;
@@ -383,6 +384,7 @@ export namespace AdminPanelEp {
         mobile_number,
         email || "",
         area || "",
+        address || "",
         userRole,
         password_hash,
         is_active
