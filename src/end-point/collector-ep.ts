@@ -222,7 +222,8 @@ export namespace CollectorEp {
             id: citizenId,
             pickupId: pickupId,
             name: user?.full_name || "",
-            area: user?.area || user?.area || "",
+            area: user?.area || "",
+            address: user?.address || user?.area || "",
             mobile: user?.mobile_number || "",
             items: [] as any[],
             totalValue: "0",
@@ -451,7 +452,8 @@ export namespace CollectorEp {
           _id: (r._id || r.id)?.toString(),
           citizenName: user?.full_name || "",
           citizenMobile: user?.mobile_number || "",
-          area: user?.area || user?.area || "",
+          area: user?.area || "",
+          address: user?.address || user?.area || "",
           date: coll?.collected_at
             ? new Date(coll.collected_at).toISOString().split("T")[0]
             : r.created_at

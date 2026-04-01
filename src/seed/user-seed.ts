@@ -26,5 +26,15 @@ async function signUpWithEmail(user: DUser) {
         return existingType;
     }
 
-    return await UserDao.signUpWithEmail(user.full_name, user.username, user.mobile_number, user.email, user.area, user.role, user.password_hash, user.is_active);
+    return await UserDao.signUpWithEmail(
+        user.full_name,
+        user.username,
+        user.mobile_number,
+        user.email,
+        user.area,
+        "",
+        user.role,
+        user.password_hash,
+        user.is_active
+    );
 }

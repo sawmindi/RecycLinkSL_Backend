@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { UserDao } from "../dao/user-dao";
 import { validationResult } from "express-validator";
 import { UserRole } from "../models/user-model";
+import multer = require("multer");
 import { Validation } from "../common/validation";
 import { Util } from "../common/util";
 import { Types } from "mongoose";
@@ -80,6 +81,7 @@ export namespace UserEp {
         const email = req.body.email;
         const mobile_number = req.body.phoneNumber || req.body.mobile_number;
         const area = req.body.area;
+        const address = req.body.address;
         const password_hash = req.body.password;
         const is_active = false;
         const role = UserRole.CITIZEN;
@@ -99,6 +101,7 @@ export namespace UserEp {
                 mobile_number,
                 email,
                 area,
+                address || "",
                 role,
                 password_hash,
                 is_active
@@ -141,6 +144,7 @@ export namespace UserEp {
         const email = req.body.email;
         const mobile_number = req.body.phoneNumber || req.body.mobile_number;
         const area = req.body.area;
+        const address = req.body.address;
         const password_hash = req.body.password;
         const is_active = req.body.is_active ?? true;
 
@@ -157,6 +161,7 @@ export namespace UserEp {
                 mobile_number,
                 email,
                 area,
+                address || "",
                 UserRole.COLLECTOR,
                 password_hash,
                 is_active

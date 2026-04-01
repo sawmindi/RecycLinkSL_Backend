@@ -1,17 +1,29 @@
 import { Types } from "mongoose";
 import { IPickupRequest } from "../models/pickup-request-model";
 import PickupRequest from "../schemas/pickup-request-schema";
+import Collection from "../schemas/collection-schema";
 import { ApplicationError } from "../common/application-error";
 import { Util } from "../common/util";
 
 export namespace PickupRequestDao {
   export async function findAllForAdmin(): Promise<any[]> {
     const list = await PickupRequest.find({})
-      .populate("user_id", "full_name area")
+      .populate("user_id", "full_name area address")
       .populate("item_id", "name category_id")
       .populate("assigned_collector_id", "full_name")
       .sort({ created_at: -1 })
       .lean();
+
+    const requestIds = (list as any[]).map((pr) => pr._id).filter(Boolean);
+    const collections = requestIds.length
+      ? await Collection.find({ request_id: { $in: requestIds } }).lean()
+      : [];
+    const collectionByRequestId = new Map<string, any>();
+    for (const c of collections as any[]) {
+      const key = c.request_id?.toString();
+      if (key) collectionByRequestId.set(key, c);
+    }
+
     const Category = (await import("../schemas/category-schema")).default;
     const result = [];
     for (const pr of list as any[]) {
@@ -20,10 +32,15 @@ export namespace PickupRequestDao {
         const cat = await Category.findById(pr.item_id.category_id).lean();
         category_name = (cat as any)?.name;
       }
+      const prId = pr._id?.toString();
+      const coll = prId ? collectionByRequestId.get(prId) : undefined;
+
       result.push({
-        id: pr._id?.toString(),
+        _id: prId,
+        id: prId,
         citizen_name: pr.user_id?.full_name || "—",
         citizen_area: pr.user_id?.area || "—",
+        citizen_address: pr.user_id?.address || pr.user_id?.area || "—",
         item_name: pr.item_name,
         category_name,
         rough_weight: pr.rough_weight,
@@ -32,6 +49,9 @@ export namespace PickupRequestDao {
         status: pr.status || "pending",
         assigned_collector: pr.assigned_collector_id?.full_name,
         created_at: pr.created_at ? new Date(pr.created_at).toISOString() : new Date().toISOString(),
+        actual_weight: coll?.actual_weight ?? null,
+        final_price: coll?.final_price ?? null,
+        collection_id: coll?._id?.toString() ?? null,
       });
     }
     return result;
