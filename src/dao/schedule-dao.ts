@@ -8,7 +8,7 @@ export namespace ScheduleDao {
   export async function findAll(): Promise<any[]> {
     const list = await Schedule.find({})
       .populate("collector_id", "full_name")
-      .sort({ date: 1, time: 1 })
+      .sort({ date: -1, time: 1 })
       .lean();
     return (list as any[]).map((s) => ({
       id: (s._id || s.id)?.toString(),

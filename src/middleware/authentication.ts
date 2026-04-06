@@ -31,6 +31,20 @@ export class Authentication {
     }
   }
 
+  public static citizenVerification(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void {
+    if (req.user.role === UserRole.CITIZEN) {
+      return next();
+    } else {
+      res.status(403).json({
+        success: false,
+        message: "No authorization to access this route.",
+      });
+    }
+  }
 
   public static superAdminVerification(req: Request, res: Response, next: NextFunction): void {
     if (req.user.role === UserRole.ADMIN) {

@@ -12,9 +12,12 @@ import { CollectorAssignmentDao } from "../dao/collector-assignment-dao";
 import { PriceManagementDao } from "../dao/price-management-dao";
 import { UserDao } from "../dao/user-dao";
 import User from "../schemas/user-schema";
+import PickupRequest from "../schemas/pickup-request-schema";
 import Schedule from "../schemas/schedule-schema";
 import { UserRole } from "../models/user-model";
+import { Util } from "../common/util";
 import { Types } from "mongoose";
+import { SmsNotify } from "../services/sms-notifications";
 
 export namespace AdminPanelEp {
   // Dashboard
@@ -288,14 +291,80 @@ export namespace AdminPanelEp {
     try {
       const requestId = paramId(req, "requestId");
       const { collector_id } = req.body;
+      const prDoc: any = await PickupRequest.findById(requestId)
+        .populate("user_id", "full_name mobile_number")
+        .lean();
+      const collector = await User.findById(collector_id).select("mobile_number full_name").lean();
+
       await PickupRequestDao.assignCollector(requestId, new Types.ObjectId(collector_id));
+
+      if (prDoc && collector) {
+        const u = prDoc.user_id as any;
+        void SmsNotify.collectorAssignedPickup(
+          (collector as any).mobile_number,
+          prDoc.item_name,
+          requestId,
+          u?.full_name || ""
+        );
+      }
+
       return res.sendSuccess(null);
     } catch (error) {
       return res.sendError(error);
     }
   }
 
-  // Items (price management)
+  export async function cancelPickupRequest(req: Request, res: Response) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.sendError(errors.array()[0]["msg"]);
+    try {
+      const id = paramId(req, "requestId");
+      if (!Util.isObjectId(id)) {
+        return res.sendError("Invalid pickup request id");
+      }
+      const { status, notes } = req.body as { status?: string; notes?: string };
+
+      const request: any = await PickupRequest.findById(id);
+      if (!request) {
+        return res.sendError("Pickup request not found");
+      }
+
+      const citizenDoc = request.user_id
+        ? await User.findById(request.user_id).select("mobile_number").lean()
+        : null;
+      let collectorPhone: string | undefined;
+      if (request.assigned_collector_id) {
+        const col = await User.findById(request.assigned_collector_id).select("mobile_number").lean();
+        collectorPhone = (col as any)?.mobile_number;
+      }
+
+      request.status =
+        typeof status === "string" && status.trim().length > 0
+          ? status.trim()
+          : "cancelled";
+      if (typeof notes === "string" && notes.length > 0) {
+        (request as any).admin_notes = notes;
+      }
+      request.schedule_id = null as any;
+      request.assigned_collector_id = null as any;
+      await request.save();
+
+      void SmsNotify.citizenAndCollectorPickupCancelledByAdmin(
+        (citizenDoc as any)?.mobile_number,
+        collectorPhone,
+        request.item_name,
+        id
+      );
+
+      return res.sendSuccess({
+        _id: request._id?.toString(),
+        status: request.status,
+      });
+    } catch (error) {
+      return res.sendError(error);
+    }
+  }
+  
   export async function getItems(req: Request, res: Response) {
     try {
       const list = await PriceManagementDao.findAll();
@@ -488,5 +557,9 @@ export namespace AdminPanelEp {
   export function assignCollectorRules() {
     const { check } = require("express-validator");
     return [check("collector_id").not().isEmpty().withMessage("Collector is required")];
+  }
+
+  export function cancelPickupRequestRules(): any[] {
+    return [];
   }
 }

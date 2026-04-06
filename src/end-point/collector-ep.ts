@@ -4,8 +4,11 @@ import { Types } from "mongoose";
 import { Util } from "../common/util";
 import PickupRequest from "../schemas/pickup-request-schema";
 import Schedule from "../schemas/schedule-schema";
+import PriceManagement from "../schemas/price-management-schema";
 import Collection from "../schemas/collection-schema";
 import Notification from "../schemas/notification-schema";
+import User from "../schemas/user-schema";
+import { SmsNotify } from "../services/sms-notifications";
 
 function getUserId(req: Request): Types.ObjectId {
   const id = (req.user as any)?._id;
@@ -354,6 +357,16 @@ export namespace CollectorEp {
       }
       await request.save();
 
+      const citizen = request.user_id
+        ? await User.findById(request.user_id).select("mobile_number").lean()
+        : null;
+      void SmsNotify.citizenAndAdminsPickupCompleted(
+        (citizen as any)?.mobile_number,
+        request.item_name,
+        request._id.toString(),
+        finalPrice
+      );
+
       return res.sendSuccess(null);
     } catch (error) {
       return res.sendError(error);
@@ -379,7 +392,7 @@ export namespace CollectorEp {
       };
       const citizenId =
         typeof rawCitizenId === "string" ? rawCitizenId.trim() : "";
-      console.log("AV", requestId)
+
       const request: any = await PickupRequest.findOne({
         _id: new Types.ObjectId(String(requestId)),
         assigned_collector_id: collectorId,
@@ -405,11 +418,21 @@ export namespace CollectorEp {
       request.status =
         typeof status === "string" && status.trim().length > 0
           ? status.trim()
-          : "canceled";
+          : "cancelled";
       if (typeof notes === "string") {
         request.collector_notes = notes;
       }
       await request.save();
+
+      const citizen = request.user_id
+        ? await User.findById(request.user_id).select("mobile_number").lean()
+        : null;
+      void SmsNotify.citizenAndAdminsPickupCancelled(
+        (citizen as any)?.mobile_number,
+        request.item_name,
+        request._id.toString(),
+        "collector"
+      );
 
       return res.sendSuccess({
         _id: request._id?.toString(),

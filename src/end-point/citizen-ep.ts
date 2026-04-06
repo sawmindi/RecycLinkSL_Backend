@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
+import { Util } from "../common/util";
+import User from "../schemas/user-schema";
 import PickupRequest from "../schemas/pickup-request-schema";
+import { SmsNotify } from "../services/sms-notifications";
 import Schedule from "../schemas/schedule-schema";
 import PriceManagement from "../schemas/price-management-schema";
 import Category from "../schemas/category-schema";
@@ -123,6 +126,13 @@ export namespace CitizenEp {
       });
 
       await doc.save();
+      const citizen = await User.findById(userId).select("full_name mobile_number").lean();
+      void SmsNotify.adminsNewPickupRequest(
+        (citizen as any)?.full_name || "Citizen",
+        doc.item_name,
+        doc._id.toString()
+      );
+
       const r: any = await PickupRequest.findById(doc._id)
         .populate("assigned_collector_id", "full_name")
         .populate("schedule_id")
@@ -150,6 +160,10 @@ export namespace CitizenEp {
       const area = (req.query.area as string) || undefined;
       const filter: any = { status: "pending" };
       if (area) filter.area = area;
+
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      filter.date = { $gte: startOfToday };
 
       const list = await Schedule.find(filter)
         .populate("collector_id", "full_name")
@@ -264,6 +278,67 @@ export namespace CitizenEp {
     }
   }
 
+  // Cancel own pickup request
+  export async function cancelPickup(req: Request, res: Response) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.sendError(errors.array()[0]["msg"]);
+    try {
+      const userId = getUserId(req);
+      const rawId = req.params.requestId;
+      const requestId = Array.isArray(rawId) ? rawId[0] : rawId;
+      if (!Util.isObjectId(String(requestId))) {
+        return res.sendError("Invalid pickup request id");
+      }
+
+      const { status, notes } = req.body as { status?: string; notes?: string };
+
+      const request: any = await PickupRequest.findOne({
+        _id: new Types.ObjectId(String(requestId)),
+        user_id: userId,
+      });
+
+      if (!request) {
+        return res.sendError("Pickup request not found");
+      }
+
+      const citizenUser = await User.findById(userId).select("full_name mobile_number").lean();
+      let collectorPhone: string | undefined;
+      if (request.assigned_collector_id) {
+        const col = await User.findById(request.assigned_collector_id).select("mobile_number").lean();
+        collectorPhone = (col as any)?.mobile_number;
+      }
+
+      const current = String(request.status || "").toLowerCase();
+      if (current === "completed") {
+        return res.sendError("Cannot cancel a completed pickup");
+      }
+
+      request.status =
+        typeof status === "string" && status.trim().length > 0
+          ? status.trim()
+          : "cancelled";
+      if (typeof notes === "string" && notes.length > 0) {
+        (request as any).citizen_notes = notes;
+      }
+      request.schedule_id = null as any;
+      await request.save();
+
+      void SmsNotify.adminsAndCollectorPickupCancelledByCitizen(
+        collectorPhone,
+        request.item_name,
+        request._id.toString(),
+        (citizenUser as any)?.full_name || ""
+      );
+
+      return res.sendSuccess({
+        _id: request._id?.toString(),
+        status: request.status,
+      });
+    } catch (error) {
+      return res.sendError(error);
+    }
+  }
+
   // Notifications
   export async function getNotifications(req: Request, res: Response) {
     try {
@@ -300,6 +375,10 @@ export namespace CitizenEp {
   export function assignScheduleRules() {
     const { check } = require("express-validator");
     return [check("schedule_id").not().isEmpty().withMessage("Schedule is required")];
+  }
+
+  export function cancelPickupRules(): any[] {
+    return [];
   }
 }
 
