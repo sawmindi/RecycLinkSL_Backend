@@ -2,6 +2,7 @@ import { Express } from "express";
 import { UserEp } from "../end-point/user-ep";
 import { CitizenEp } from "../end-point/citizen-ep";
 import { CollectorEp } from "../end-point/collector-ep";
+import { AdminPanelEp } from "../end-point/admin-panel-ep";
 import { Authentication } from "../middleware/authentication";
 
 export function initUserRoutes(app: Express) {
@@ -118,4 +119,20 @@ export function initUserRoutes(app: Express) {
     // Collector notifications
     app.get("/api/collector/notifications", collectorAuth, CollectorEp.getNotifications);
 
+    // Citizen & admin cancel pickup request
+    const citizenAuth = [Authentication.verifyToken, Authentication.citizenVerification];
+    app.post(
+        "/api/citizen/pickups/:requestId/cancel",
+        citizenAuth,
+        CitizenEp.cancelPickupRules(),
+        CitizenEp.cancelPickup
+    );
+
+    const adminAuth = [Authentication.verifyToken, Authentication.superAdminVerification];
+    app.post(
+        "/api/admin/pickups/:requestId/cancel",
+        adminAuth,
+        AdminPanelEp.cancelPickupRequestRules(),
+        AdminPanelEp.cancelPickupRequest
+    );
 }

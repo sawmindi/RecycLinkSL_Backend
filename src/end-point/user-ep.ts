@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { UserDao } from "../dao/user-dao";
-import { validationResult } from "express-validator";
-import { UserRole } from "../models/user-model";
+import { check, validationResult } from "express-validator";
+import { DUser, IUser, UserRole } from "../models/user-model";
 import multer = require("multer");
 import { Validation } from "../common/validation";
 import { Util } from "../common/util";
 import { Types } from "mongoose";
 import { AppLogger } from "../common/logging";
+import { SmsNotify } from "../services/sms-notifications";
 
 const otpGenerator = require("otp-generator");
 const crypto = require("crypto");
@@ -107,8 +108,6 @@ export namespace UserEp {
                 is_active
             );
             let code = Math.floor(Math.random() * (999999 - 100000 + 1) + 100000);
-            console.log(code)
-
             verificationCode = code.toString();
 
             const updatedUser: any = {
@@ -120,6 +119,9 @@ export namespace UserEp {
             if (!userWithVerificationCode) {
                 return res.sendError("Something went wrong with verification code.");
             }
+
+            void SmsNotify.citizenSignUpOtp(mobile_number, verificationCode);
+            void SmsNotify.adminsNewCitizen(full_name, mobile_number, area || "");
 
             return res.sendSuccess(user, "Success");
 
@@ -238,7 +240,6 @@ export namespace UserEp {
 
             const ttl = 5 * 60 * 1000;
             const expires = Date.now() + ttl;
-            let otpSent;
 
             if (phoneNumber != "") {
                 const data = `${phoneNumber}.${otp}.${expires}`;
@@ -248,13 +249,12 @@ export namespace UserEp {
                     .digest("hex");
                 const fullHash = `${hash}.${expires}`;
 
-                if (phoneNumber.startsWith("0")) {
-                    phoneNumber = "94" + phoneNumber.substring(1);
-                }
-                console.log(otp)
+                const phoneForSms = phoneNumber.startsWith("0")
+                    ? "94" + phoneNumber.substring(1)
+                    : phoneNumber;
+                console.log("[forgot-password OTP]", otp);
+                void SmsNotify.forgotPasswordOtp(phoneForSms, otp);
 
-                let text: string;
-                text = `Your OTP code is ${otp}. Do not share this code.`;
                 const data1 = {
                     otp: otp,
                     fullHash: fullHash
