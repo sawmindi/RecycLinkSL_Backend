@@ -1,7 +1,8 @@
 # RecycLinkSL_Backend
 
-REST API backend for **RecycLinkSL** — a web-based recycling collection and citizen engagement system for Urban Councils in Sri Lanka  
+REST API backend for **RecycLinkSL** - a web-based recycling collection and citizen engagement system for Urban Councils in Sri Lanka  
 Final Year Project (IIT/UoW) 
+Author: Thenahandi Sandali Sawmindi De Silva
 
 
 ## Tech Stack
@@ -9,139 +10,145 @@ Final Year Project (IIT/UoW)
 - Node.js ≥ 18
 - Express.js
 - TypeScript
-- MongoDB (via `mongoose`)
-- CORS
+- MongoDB + Mongoose ODM
+- JWT + bcrypt + Passport.js
 - dotenv (environment variables)
-- Development: ts-node-dev
+- Development: ts-node-dev + TypeScript
+- SMSLenz for sms notifications
 
-## Folder Structure (Current – IPD Stage)
+## Folder Structure
 
-Modular MVC Folder Structure
+Modular Folder Structure
 ----------------------------
 `
 ├── src/
-│   ├── config/
-│   │   ├── db.ts                  # Database connection pool
-│   │   └── index.ts               # App-wide config
+│   ├── common/                  # Application utilities
+│   │   ├── application-error.ts
+│   │   ├── logging.ts
+│   │   ├── util.ts
+│   │   └── validation.ts
 │
-│   ├── modules/
-│   │   ├── auth/
-│   │   │   ├── auth.model.ts      # DB queries
-│   │   │   ├── auth.service.ts    # Business logic
-│   │   │   ├── auth.controller.ts # Request/response handling
-│   │   │   └── auth.route.ts      # Express router
-│   │   │
-│   │   ├── categories/
-│   │   │   ├── categories.model.ts
-│   │   │   ├── categories.service.ts
-│   │   │   ├── categories.controller.ts
-│   │   │   └── categories.route.ts
-│   │   │
-│   │   ├── pickups/
-│   │   │   ├── pickups.model.ts
-│   │   │   ├── pickups.service.ts
-│   │   │   ├── pickups.controller.ts
-│   │   │   └── pickups.route.ts
-│   │   │
-│   │   ├── users/
-│   │   │   ├── users.model.ts
-│   │   │   ├── users.service.ts
-│   │   │   ├── users.controller.ts
-│   │   │   └── users.route.ts
-│   │   │
-│   │   └── collectors/
-│   │       ├── collectors.model.ts
-│   │       ├── collectors.service.ts
-│   │       ├── collectors.controller.ts
-│   │       └── collectors.route.ts
+│   ├── dao/                     # Data Access Objects (DAOs)
+│   │   ├── admin-dao.ts
+│   │   ├── category-dao.ts
+│   │   ├── collection-dao.ts
+│   │   ├── collector-assignment-dao.ts
+│   │   ├── customer-dao.ts
+│   │   ├── installment-dao.ts
+│   │   ├── pickup-request-dao.ts
+│   │   ├── price-management-dao.ts
+│   │   ├── schedule-dao.ts
+│   │   ├── upload-dao.ts
+│   │   └── user-dao.ts│
+│   ├── dao/                     # Data Access Objects (DAOs)
+│   │   ├── admin-dao.ts
+│   │   ├── category-dao.ts
+│   │   ├── collection-dao.ts
+│   │   ├── collector-assignment-dao.ts
+│   │   ├── customer-dao.ts
+│   │   ├── installment-dao.ts
+│   │   ├── pickup-request-dao.ts
+│   │   ├── price-management-dao.ts
+│   │   ├── schedule-dao.ts
+│   │   ├── upload-dao.ts
+│   │   └── user-dao.ts
 │
-│   ├── middleware/
-│   │   ├── authMiddleware.ts      # JWT / role checks
-│   │   ├── errorHandler.ts        # Global error handling
-│   │   └── validationMiddleware.ts # Input validation
+│   ├── end-point/             # Route Definitions
+│   │   ├── admin-ep.ts     
+│   │   ├── admin-panel-ep.ts  
+│   │   ├── citizen-ep.ts
+│   │   ├── collector-ep.ts
+│   │   ├── upload-ep.ts
+│   │   ├── user-ep.ts
+│    
+│   ├── middleware/            # Auth, error handling, role verification
+│   │   ├── authentication.ts
+│   │   ├── error-handle.ts
+│   │   ├── jwt-token.ts
+│   │   ├── request-logger.ts 
+│   │   ├── response-handler.ts
+│   │   ├── verify-permission.ts
+│   │   └── verify-role.ts   
+│   
+│   ├── models/            # Mongoose Models 
+│   │   ├── admin-model.ts
+│   │   ├── audit-log-model.ts
+│   │   ├── category-model.ts
+│   │   ├── collection-model.ts
+│   │   ├── collector-assignment-model.ts
+│   │   ├── pickup-request-model.ts
+│   │   ├── price-management-model.ts
+│   │   ├── schedule-model.ts
+│   │   ├── upload-model.ts
+│   │   └── user-model.ts 
+│ 
+│   ├── routes/                  # Express route files
+│   │   ├── admin-panel.ts
+│   │   ├── admin.ts
+│   │   ├── index.ts
+│   │   └── user.ts
+│   
+│   ├── schemas/                 # Mongoose schemas
+│   │   ├── sub-schema/
+│   │   └── *.schema.ts
+│   
+│   ├── seed/                
+│   │   ├── seed-runner.ts
+│   │   ├── seed.ts
+│   │   └── user-seed.ts
+│   
+│   ├── services/                # Business logic & external services
+│   │   ├── sms-notifications.ts
+│   │   └── sms.ts
 │
-│   ├── utils/
-│   │   ├── logger.ts
-│   │   ├── helpers.ts             # Earnings calc, date utils
-│   │   └── notifications.ts       # Nodemailer / Twilio helpers
+│   ├── startup/                 # Startup configuration
+│   │   ├── database.ts
+│   │   └── passport.ts
 │
-│   ├── routes/
-│   │   └── index.ts               # Combines all module routes
+│   │
+│   ├── config.ts
+│   ├── global.config.ts         
+│   └── server.ts                # Main Express app entry point
 │
-│   ├── types/
-│   │   └── environment.d.ts       # Type-safe env variables
-│
-│   └── server.ts        # App entry point (main Express setup)
-│
-├── uploads/                       # uploaded images/docs
-├── logs/                          # log files
-├── dist/                          # TypeScript build output
-├── .env
+├── .env                         # Environment variables
 ├── .gitignore
-├── tsconfig.json
-├── nodemon.json                   
 ├── package.json
-└── package-lock.json
-`
+├── tsconfig.json
+├── tslint.json
+├── README.md
 
 ## Development Setup
 
 ### Prerequisites
-- Node.js (v16.18 or higher)
+- Node.js (v18 or higher)
 - npm or yarn
 - MongoDB database
 
 ### Installation
 
-1. Install dependencies:
+1. Clone the repository and navigate to the backend folder
+
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Set up environment variables:
+3. Set up environment variables:
 ```bash
-cp .env.example .env
-# Edit .env with your database configuration
+cp  .env
 ```
 
-3. Run database migrations:
+4. Run seed data (Optional)
 ```bash
-npx prisma migrate dev
+npm run seed
 ```
 
 ### Development Commands
-
-- **Development server with hot reload:**
-  ```bash
-  npm run dev
-  ```
-
-- **Build TypeScript to JavaScript:**
-  ```bash
-  npm run build
-  ```
 
 - **Start production server:**
   ```bash
   npm start
   ```
 
-- **Watch mode for TypeScript compilation:**
-  ```bash
-  npm run dev:watch
-  ```
-
-### Environment Variables
-
-```env
-# Server Configuration
-PORT=4000
-NODE_ENV=development
-
-# Database
-DATABASE_URL="mongodb://localhost:27017/**********db"
-
-# API Security (Optional)
-API_KEY="your-api-key"
-JWT_SECRET="your-jwt-secret"
-```
+### API Base URL
+http://localhost:3010
