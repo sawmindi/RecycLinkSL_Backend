@@ -40,18 +40,6 @@ Modular Folder Structure
 │   │   ├── schedule-dao.ts
 │   │   ├── upload-dao.ts
 │   │   └── user-dao.ts│
-│   ├── dao/                     # Data Access Objects (DAOs)
-│   │   ├── admin-dao.ts
-│   │   ├── category-dao.ts
-│   │   ├── collection-dao.ts
-│   │   ├── collector-assignment-dao.ts
-│   │   ├── customer-dao.ts
-│   │   ├── installment-dao.ts
-│   │   ├── pickup-request-dao.ts
-│   │   ├── price-management-dao.ts
-│   │   ├── schedule-dao.ts
-│   │   ├── upload-dao.ts
-│   │   └── user-dao.ts
 │
 │   ├── end-point/             # Route Definitions
 │   │   ├── admin-ep.ts     
