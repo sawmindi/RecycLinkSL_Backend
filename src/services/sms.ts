@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const SMS_REAL = process.env.SMS_SEND_REAL === "true";
+
 export function normalizeLkMobile(input: string | undefined | null): string | null {
   if (input == null || typeof input !== "string") return null;
   let d = input.replace(/\s+/g, "").replace(/^\+/, "");
